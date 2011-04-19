@@ -32,6 +32,8 @@ group :development do
   gem 'rspec-rails', '2.5.0'
   gem 'autotest', '4.4.6'
   gem 'autotest-rails-pure', '4.1.2'
+  gem 'ZenTest'
+  gem 'spork', '0.9.0.rc5'
 end
 
 group :test do

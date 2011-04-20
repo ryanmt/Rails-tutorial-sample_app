@@ -34,6 +34,7 @@ group :development do
   gem 'autotest-rails-pure', '4.1.2'
   gem 'ZenTest'
   gem 'spork', '0.9.0.rc5'
+  gem 'annotate-models', '1.0.4'
 end
 
 group :test do

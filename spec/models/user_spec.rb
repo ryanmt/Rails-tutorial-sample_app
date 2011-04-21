@@ -43,7 +43,7 @@ describe User do
       user_dup = User.new(@attr)
       user_dup.should_not be_valid
     end
-  end
+  end #email validity/ uniqueness
   describe 'Password verifications' do 
     it 'requires a password' do
       User.new(@attr.merge(password: "", password_confirmation: "")).should_not be_valid
@@ -59,7 +59,7 @@ describe User do
       long = 'a'*41
       User.new(@attr.merge(password: long, password_confirmation: long)).should_not be_valid
     end
-  end
+  end #password verifications
   describe "Password encrytion" do
     before(:each) do
       @user = User.create!(@attr)
@@ -70,7 +70,7 @@ describe User do
     it 'sets the encrypted password' do 
       @user.encrypted_password.should_not be_blank
     end
-  end
+  end # password encryption
   describe 'has_password? method' do
     before(:each) do 
       @user = User.create!(@attr)
@@ -82,7 +82,7 @@ describe User do
     it 'should be false if the passwords dont match' do 
       @user.has_password?("invalid").should be_false
     end
-  end
+  end # has password?
   describe 'authenticate method' do 
     it 'should return nil on email/password mismatch' do 
       wrong_password = User.authenticate(@attr[:email], "wrongpass")
@@ -96,5 +96,20 @@ describe User do
       matching_user = User.authenticate(@attr[:email], @attr[:password])
       matching_user.should == @user
     end
-  end
+  end # authentication
+  describe 'administrator' do
+    before(:each) do 
+      @user = User.create(@attr)
+    end
+    it 'responds to admin' do 
+      @user.should respond_to(:admin)
+    end
+    it "isn't an admin by default" do 
+      @user.should_not be_admin
+    end
+    it 'can become an admin' do 
+      @user.toggle!(:admin)
+      @user.should be_admin
+    end
+  end # administrator
 end

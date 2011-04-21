@@ -82,5 +82,167 @@ describe UsersController do
       end # ('success2')
     end #describe success
   end # describe POST 'create'
+  describe 'GET "edit"' do 
+    before(:each) do 
+      @user = Factory(:user)
+      test_sign_in(@user)
+    end
+    it 'succeeds' do 
+      get :edit, id: @user
+      response.should be_success
+    end
+    it 'has the correct right title' do 
+      get :edit, id: @user
+      response.should have_selector('title', content: "Edit user")
+    end
+    it 'has a link to change the Gravatar image' do 
+      get :edit, id: @user
+      gravatar_url = 'http://gravatar.com/emails'
+      response.should have_selector('a', href: gravatar_url, content: 'change')
+    end
+  end # GET edit
+  describe "PUT 'update'" do
+    before(:each) do 
+      @user = Factory(:user)
+      test_sign_in @user
+    end
+    describe 'failure' do   
+      before(:each) do 
+         @attr = {email: '', name: '', password: '', password_confirmation: ''}
+      end
+      it 'renders the "edit" page' do 
+        put :update, id: @user, user: @attr
+        response.should render_template('edit')
+      end
+      it 'has the right title' do 
+        put :update, id: @user, user: @attr
+        response.should have_selector('title', content: "Edit user")
+      end
+    end  # Failure
+    describe 'success' do 
+      before(:each) do 
+        @attr= {name: "New Name", email: 'user@example.org', password: 'barbaz', password_confirmation: 'barbaz'}
+      end
+      it 'changes the user attributes' do 
+        put :update, id: @user, user: @attr
+        @user.reload
+        @user.name.should == @attr[:name]
+        @user.email.should == @attr[:email]
+      end
+      it 'redirects to the user show page' do 
+        put :update, id: @user, user: @attr
+        response.should redirect_to(user_path(@user))
+      end
+      it 'flashes the success message' do 
+        put :update, id: @user, user: @attr
+        flash[:success].should =~ /updated/i
+      end
+    end # Success
+  end # "PUT 'update'"
+  describe 'authenticate the edit/update pages' do
+    before(:each) do 
+      @user = Factory(:user)
+    end
+    describe 'logged out users' do
+      it 'denies access to edit' do 
+        get :edit, id: @user
+        response.should redirect_to(login_path)
+      end
+      it 'denies access to update' do
+        get :update, id: @user, user: {}
+        response.should redirect_to(login_path)
+      end
+    end # Not logged in
+    describe 'logged in users' do
+      before(:each) do 
+        wrong_user = Factory(:user, email: 'user@example.net')
+        test_sign_in wrong_user
+      end
+      it 'requires a matched user to edit' do
+        get :edit, id: @user
+        response.should redirect_to(root_path)
+      end
+      it 'requires a matched user to update' do
+        put :update, id: @user, user:  {}
+        response.should redirect_to(root_path)
+      end
+    end # Logged in users
+  end # authenticate user edits
+  describe 'GET "index" of users' do 
+    describe 'logged out users' do 
+      it 'denies access' do
+        get :index
+        response.should redirect_to(login_path)
+        flash[:notice].should =~ /log in/i
+      end
+    end #unlogged users
+    describe 'logged in users' do 
+      before(:each) do 
+        @user = test_sign_in(Factory(:user))
+        second = Factory(:user, name: "bob", email: 'another@example.com')
+        third = Factory(:user, name: "Ben", email: 'another@example.net')
+        @users = [@user, second, third]
+        30.times do 
+          @users << Factory(:user, email: Factory.next(:email))
+        end
+      end
+      it 'succeeds' do 
+        get :index
+        response.should be_success
+      end
+      it 'has the right title' do 
+        get :index
+        @users.each do |user|
+          response.should have_selector('li', content: user.name)
+        end
+      end
+      it 'has an element for each user' do
+        get :index
+        @users[0..2].each do |u|
+          response.should have_selector('li', content: u.name)
+        end
+      end
+      it 'paginates the user list' do 
+        get :index
+        response.should have_selector('div.pagination')
+        response.should have_selector('span.disabled', content: "Previous")
+        response.should have_selector('a', href: '/users?page=2', content: '2')
+        response.should have_selector('a', href: '/users?page=2', content: 'Next')
+      end
+    end # logged in users
+  end # user index
+  describe " DELETE 'destroy'" do
+    before (:each) do 
+      @user = Factory :user
+    end
+    describe 'not logged in' do 
+      it 'denies access' do 
+        delete :destroy, id: @user
+        response.should redirect_to(login_path)
+      end
+    end
+    describe 'logged in as non-admin' do 
+      it 'prohibts deletion' do
+        test_sign_in(@user)
+        delete :destroy, id: @user
+        response.should redirect_to(root_path)
+      end
+    end
+    describe 'logged in as admin' do 
+      before(:each) do 
+        admin = Factory(:user, email: 'admin@example.com', admin: true)
+        test_sign_in(admin)
+      end
+      it 'destroys the user' do
+        lambda do 
+          delete :destroy, id: @user
+        end.should change(User, :count).by(-1)
+      end
+      it 'redirects to the users page' do 
+        delete :destroy, id: @user
+        response.should redirect_to(users_path)
+      end
+    end # admin logged in
+  end # DELETE destroy
 end
 

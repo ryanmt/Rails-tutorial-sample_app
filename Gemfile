@@ -1,11 +1,13 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.0.6'
+gem 'rails', '3.0.7'
+gem 'gravatar_image_tag', '1.0.0.pre2'
+gem 'sqlite3-ruby', '1.3.2', :require => 'sqlite3'
+gem 'sqlite3'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
-gem 'sqlite3'
 
 # Use unicorn as the web server
 # gem 'unicorn'
@@ -21,7 +23,6 @@ gem 'sqlite3'
 # gem 'bj'
 # gem 'nokogiri'
 
-gem 'sqlite3-ruby', '1.3.2', :require => 'sqlite3'
 
 # gem 'aws-s3', :require => 'aws/s3'
 
@@ -40,6 +41,7 @@ end
 group :test do
    gem 'webrat', '0.7.1'
    gem 'rspec', '2.5.0'
+   gem 'factory_girl_rails', '1.0'
 end
 
 

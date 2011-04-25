@@ -15,7 +15,7 @@ describe UsersController do
     end
   end
 
-  describe 'SHOW users' do
+  describe 'GET show users' do
     before(:each) do 
       @user = Factory(:user)
       get :show, id: @user
@@ -32,10 +32,20 @@ describe UsersController do
     it 'should use their name' do 
       response.should have_selector('h1', content: @user.name)
     end
-    it  'should have a profile image' do 
+    it 'should have a profile image' do 
       response.should have_selector("h1>img", class: 'gravatar')
     end
-  end
+    it 'shows the microposts' do 
+      mp1 = Factory(:micropost, user: @user, content: "foo bar")
+      mp2 = Factory(:micropost, user: @user, content: "Baz quux")
+      get :show, id: @user
+      response.should have_selector('span.content', content: mp1.content)
+      response.should have_selector('span.content', content: mp2.content)
+    end
+
+
+  end # GET show users
+
   describe "POST 'create'" do 
     def prep
       post :create, user: @attr

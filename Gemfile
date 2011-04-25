@@ -36,13 +36,14 @@ group :development do
   gem 'ZenTest'
   gem 'annotate-models', '1.0.4'
   gem 'faker', '0.3.1'
+  gem 'rcov'
 end
 
 group :test do
-   gem 'webrat', '0.7.1'
-   gem 'spork', '0.9.0.rc5'
-   gem 'rspec', '2.5.0'
-   gem 'factory_girl_rails', '1.0'
+  gem 'webrat', '0.7.1'
+  gem 'spork', '0.9.0.rc5'
+  gem 'rspec', '2.5.0'
+  gem 'factory_girl_rails', '1.0'
 end
 
 

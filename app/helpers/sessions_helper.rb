@@ -1,10 +1,16 @@
 module SessionsHelper
+  def authenticate 
+    deny_access unless signed_in?
+  end
+  def deny_access
+    store_location
+    redirect_to login_path, notice: 'Please log in to access this page.'
+  end
 
   def sign_in(user)
     cookies.permanent.signed[:remember_token] = [user.id, user.salt]
     self.current_user = user
   end
-  
   def sign_out
     cookies.delete(:remember_token)
     self.current_user = nil

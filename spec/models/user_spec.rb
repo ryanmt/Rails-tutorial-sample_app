@@ -138,14 +138,64 @@ describe User do
       end
 
       it "includes user's microposts" do 
-        @user.feed.include?(@mp1).should be_true
-        @user.feed.include?(@mp2).should be_true
+        @user.feed.should include @mp1
+        @user.feed.should include @mp2
       end
 
       it "doesn't have other's microposts" do 
         mp3 = Factory(:micropost, user: Factory(:user, email: Factory.next(:email)))
-        @user.feed.include?(mp3).should be_false
+        @user.feed.should_not include mp3
+      end
+      it 'includes the microposts of the followed users' do 
+        followed = Factory(:user, email: Factory.next(:email))
+        mp3 = Factory(:micropost, user: followed)
+        @user.follow!(followed)
+        @user.feed.should include mp3
       end
     end # status feed
   end # micropost associations
+  describe 'relationships' do 
+    before :each do 
+      @user = User.create!(@attr)
+      @followed = Factory(:user)
+    end
+    it 'has the relationship method' do 
+      @user.should respond_to(:relationships)
+    end
+    it 'has a following method' do 
+      @user.should respond_to(:following)
+    end
+    it 'has a following? method' do
+      @user.should respond_to(:following?)
+    end
+    it 'has a follow! method' do 
+      @user.should respond_to(:follow!)
+    end
+    it 'follows another user' do
+      @user.follow!(@followed)
+      @user.should be_following(@followed)
+    end
+    it 'has that user in the "following" array' do
+      @user.follow!(@followed)
+      @user.following.should include(@followed)
+    end
+    it 'has a unfollow! method' do 
+      @followed.should respond_to(:unfollow!)
+    end
+    it 'unfollows a followed user' do 
+      @user.follow!(@followed)
+      @user.unfollow!(@followed)
+      @user.should_not be_following(@followed)
+    end
+    it 'has a reverse_relationships method' do 
+      @user.should respond_to(:reverse_relationships)
+    end
+    it 'has a followers method' do 
+      @user.should respond_to(:followers)
+    end
+    it 'includes the follower in the followers array' do 
+      @user.follow!(@followed)
+      @followed.followers.should include(@user)
+    end
+  end # relationships
 end

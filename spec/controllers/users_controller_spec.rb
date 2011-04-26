@@ -254,5 +254,32 @@ describe UsersController do
       end
     end # admin logged in
   end # DELETE destroy
+  describe 'follow pages' do 
+    describe 'not signed in? ' do 
+      it 'protects following' do 
+        get :following, id: 1
+        response.should redirect_to(login_path)
+      end
+      it 'protects followers' do 
+        get :followers, id: 1
+        response.should redirect_to(login_path)
+      end
+    end # Not signed in
+    describe 'signed in' do
+      before :each do 
+        @user = test_sign_in(Factory(:user))
+        @other_user = Factory(:user, email: Factory.next(:email))
+        @user.follow!(@other_user)
+      end
+      it 'shows user following' do 
+        get :following, id: @user
+        response.should have_selector('a', href: user_path(@other_user), content: @other_user.name)
+      end
+      it 'shows user followers' do 
+        get :followers, id: @other_user
+        response.should have_selector('a', href: user_path(@user), content: @user.name)
+      end
+    end # signed in
+  end # follow pages
 end
 
